@@ -1,0 +1,8 @@
+
+{
+  "name": "SmartInventory Pro",
+  "description": "A high-end, mobile-first inventory management application featuring real-time tracking, category organization, and AI-powered stock insights.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
