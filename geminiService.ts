@@ -1,10 +1,23 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// 延迟初始化：避免在 API Key 缺失时阻断整个应用
+function getAI(): GoogleGenAI | null {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey || apiKey === 'PLACEHOLDER_API_KEY') {
+    return null;
+  }
+  return new GoogleGenAI({ apiKey });
+}
 
 export async function getInventoryInsights(inventorySummary: string) {
   try {
+    const ai = getAI();
+    if (!ai) {
+      // API Key 未配置时返回默认建议
+      return ["优先处理库存不足的商品。", "每日监控畅销商品的库存情况。", "关注季节性需求波动。"];
+    }
+
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `分析以下库存状态，并为仓库管理员提供 3 条简短的专业建议。重点关注效率、库存优化和潜在风险。请使用中文回答。
@@ -21,7 +34,7 @@ export async function getInventoryInsights(inventorySummary: string) {
         }
       }
     });
-    
+
     return JSON.parse(response.text || "[]");
   } catch (error) {
     console.error("Gemini Insight Error:", error);
